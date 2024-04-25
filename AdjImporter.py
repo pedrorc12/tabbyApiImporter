@@ -1,8 +1,9 @@
 import requests
+from tqdm import tqdm
 
-token = ''
-url = ''
-urlInst = ''
+token = 'Token ' + config['TOKEN']
+url = config['BASE_URI'] + '/api/v1/tournaments/' + config['TOURNAMENT_SLUG'] + '/teams'
+urlInst = config['BASE_URI'] + '/api/v1/institutions'
 
 institutionDict = {}
 
@@ -27,7 +28,8 @@ def main():
 
     load_inst()
 
-    
+    pbar = tqdm(total=len(adj), desc='Loading teams')
+
     i = 0
     while i < len(adj):
         r = requests.post(url=url,
@@ -48,6 +50,7 @@ def main():
                         })
     
         i=i+1
+        pbar.update(1)
         if r.status_code != 201:
             print("Something went wrong!")
             print("status Code = \"{}\"".format(r.status_code))

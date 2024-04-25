@@ -1,21 +1,25 @@
+from dotenv import dotenv_values 
+from tqdm import tqdm
 import requests
 
+config = dotenv_values(".env")
+
 # Auth token
-token = ''
+token = 'Token ' + config['TOKEN']
 
 # the url of where the data will be pushed, for the teams is in the format /api/v1/tournaments/{tournemt}/teams
-url = ''
+url = config['BASE_URI'] + '/api/v1/tournaments/' + config['TOURNAMENT_SLUG'] + '/teams'
 
 # the url to get all the institutions, /api/v1/institutions
-urlInst = ''
+urlInst = config['BASE_URI'] + '/api/v1/institutions'
 
 # link of the participants category, in this case the category is called 'iniciado' the other is called 'geral'
-iniciado = ''
-geral = ''
+iniciado = config['INICIADOS_URL']
+geral = config['OPEN_URL']
 
 # link of the breaks category, in this case the category is called 'iniciado' the other is called 'geral'
-breakIniciado = ''
-breakGeral = ''
+breakIniciado = config['INICIADOS_BREAK_URL']
+breakGeral = config['INICIADOS_BREAK_URL']
 
 
 institutionDict = {}
@@ -56,6 +60,8 @@ def main():
     # Load all the possible institute
     load_inst()
 
+    pbar = tqdm(total=len(participants), desc='Loading teams')
+
     i = 0
     while i < len(participants):
         r = requests.post(url=url,
@@ -70,18 +76,18 @@ def main():
                             "institution": getInstitutionUrl(societies[i].lower()),
                             "speakers": [
                                 {
-                                "name": participants[i],
-                                "email": emails[i],
-                                "categories": [
-                                    mapIniciado(iniciado[i])
-                                ],
+                                    "name": participants[i],
+                                    "email": emails[i],
+                                    "categories": [
+                                        mapIniciado(iniciado[i])
+                                    ],
                                 },
                                 {
                                     "name": participants[i+1],
                                     "email": emails[i+1],
                                     "categories": [
-                                    mapIniciado(iniciado[i+1])
-                                ],
+                                        mapIniciado(iniciado[i+1])
+                                    ],
                                 }
                             ],
                             "use_institution_prefix": 'false',
@@ -93,15 +99,15 @@ def main():
                             ]
                           })
     
-        i=i+2
         if r.status_code != 201:
-            print("Something went wrong!")
+            print("Something went wrong! on iteration {}".format(i))
             print("status Code = \"{}\"".format(r.status_code))
-            print(r.text)
+            print(r.reason)
             print("Aborting! Some data might already have been imported")
             return
     
-    
+        i=i+2
+        pbar.update(2)
     print("All Done")
 
 def mapIniciado(cat):
@@ -126,7 +132,9 @@ def load_inst():
     # print(institutionDict)
 
 def getInstitutionUrl(inst):
-    return institutionDict[inst]
+    if inst in institutionDict:
+        return institutionDict[inst]
+    return institutionDict['narnia']
 
 if __name__ == '__main__':
     main()
