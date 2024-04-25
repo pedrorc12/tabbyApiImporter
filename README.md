@@ -10,6 +10,8 @@ First you copy the .env.template to the .env and change the variables acordinly.
 
 for the open and "inicado" category you can curl the `/api/v1/tournaments/{slug}/speaker-categories` (or the `/api/v1/tournaments/{slug}/break-categories` for the break categories) to see the options.
 
+you can download all the necessary dependecies with `pip install -r requirements.txt`
+
 after the env variables were set up you can run the main.py script the options are: 
 ```bash
   --setup         create all the necessary files
