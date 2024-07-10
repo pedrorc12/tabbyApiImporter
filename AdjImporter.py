@@ -1,8 +1,11 @@
-import requests
+from dotenv import dotenv_values 
 from tqdm import tqdm
+import requests
+
+config = dotenv_values(".env")
 
 token = 'Token ' + config['TOKEN']
-url = config['BASE_URI'] + '/api/v1/tournaments/' + config['TOURNAMENT_SLUG'] + '/teams'
+url = config['BASE_URI'] + '/api/v1/tournaments/' + config['TOURNAMENT_SLUG'] + '/adjudicators'
 urlInst = config['BASE_URI'] + '/api/v1/institutions'
 
 institutionDict = {}
@@ -28,7 +31,7 @@ def main():
 
     load_inst()
 
-    pbar = tqdm(total=len(adj), desc='Loading teams')
+    pbar = tqdm(total=len(adj), desc='Loading adjudicators')
 
     i = 0
     while i < len(adj):
@@ -50,7 +53,6 @@ def main():
                         })
     
         i=i+1
-        pbar.update(1)
         if r.status_code != 201:
             print("Something went wrong!")
             print("status Code = \"{}\"".format(r.status_code))
@@ -58,6 +60,7 @@ def main():
             print("Aborting! Some data might already have been imported")
             return
     
+        pbar.update(1)
     
     print("All Done")
 
